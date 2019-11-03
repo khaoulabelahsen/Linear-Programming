@@ -1,0 +1,45 @@
+model exp.mod;
+data projet.dat;
+set nS;
+set ajout;
+let nSous_tours := 0;
+let z:=0;
+option solver cplexamp;
+printf "--Début--";
+#solve;
+
+repeat {
+   solve;
+   option cplex_options "mipdisplay=2";
+   let nS := {};
+   let ajout:={};
+   repeat{
+   	let z := ceil(Uniform(1,n));
+   	if x[z] == 1  then { 
+   		let ajout := ajout union {z};
+   		break; # choix d'un node
+	};
+	};
+   repeat {
+      let nS :=  nS union ajout;
+      let ajout := {j in 1..n diff nS: exists {i in nS}
+         ((i,j) in A and (delta[i,j] == 1 or delta[j,i] == 1))};
+   } until card(ajout) = 0;
+  
+   if sum{i in nS, j in nS : i!=j} delta[i,j] > card(nS) - 1 then {
+      let nSous_tours := nSous_tours + 1;
+      let S[nSous_tours] := nS;   
+   } 
+   if card(nS) >= amin and d in nS and a in nS  then break;
+	
+};
+
+option omit_zero_rows 1;
+#option display_1col 1000;
+#display nSous_tours;
+#display delta;
+#display x;
+#display _total_solve_elapsed_time;
+
+printf "--Fin--";
+

@@ -1,0 +1,11 @@
+option solver cplexamp;
+option cplex_options "mipdisplay=2";
+model polynomial.mod;
+data projet.dat;
+printf "--Début--";
+solve;
+#display delta ;
+display x;
+display u;
+display _solve_elapsed_time;
+printf "--Fin--";
